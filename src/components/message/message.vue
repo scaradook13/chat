@@ -1,8 +1,8 @@
 <template>
-    <div class="flex flex-col" :class="{ 'items-end': props.sender == id}">
+    <div class="flex flex-col pt-5" :class="{ 'items-end': props.sender == id}">
         <div class="flex">
             <img :class="{ 'hidden': props.sender == id}" class="w-8 h-8 rounded-full object-cover mr-3" src="/public/favicon.ico" alt="">
-            <p class="p-3 rounded-3xl max-w-80"
+            <p class="p-3 rounded-3xl max-w-80 break-words"
                 :class="{ 'bg-gray-200 text-black': props.sender == id ,'text-white bg-blue-500': props.sender !== id   }">
                 {{ props.text }}</p>
         </div>

@@ -3,7 +3,8 @@ import { reactive, toRefs} from "vue";
 
 const userStore = reactive({
   username: [],
-  id:[]
+  id:[],
+  allUser:[]
 })
 
  
@@ -20,10 +21,20 @@ export function useUser() {
     }
   };
 
+  const fetchAllUser = async () => {
+    try {
+      const response = await apiClient("/allUser");
+      userStore.allUser = response.data.content;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
 
 
   return {
     ...toRefs(userStore),
-    fetchUser
+    fetchUser,
+    fetchAllUser
   };
 }

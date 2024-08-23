@@ -1,14 +1,21 @@
 <template>
     <div class="h-screen flex">
         <div class="w-1/4 pt-3">
-            <conversation v-for="item in getConversation" :id="item._id" :key="item._id"/>
+            <conversation v-for="item in allUser" :name="item.username" :id="item._id" :key="item._id"/>
         </div>
         <div class="w-1/2 pt-3">
-            <div class="h-5/6 p overflow-y-scroll">
-                <message v-for="item in messages" :text="item.text" :time="item.createdAt"
-                :sender="item.sender" :key="item._id" />
+            <div ref="scrollView" class="h-4/6 p-3 overflow-y-scroll scroll-smooth	">
+              <div v-if="setConversation === null">
+                <h1 class="text-4xl text-center pt-20">Start a conversation</h1>
+              </div>
+                  <message  v-for="item in messages" 
+                  :text="item.text" 
+                  :time="item.createdAt"
+                  :sender="item.sender" 
+                  :key="item._id"
+                />
             </div>
-            <div class="mt-2 flex items-center justify-between">
+            <div v-if="setConversation !== null" class="flex items-center justify-between">
                 <textarea
                 v-model="inputMessage.text"
                 required class="w-10/12 h-20 p-3 border-gray border-2" name="" id="" placeholder="Send a message ..."></textarea>
@@ -18,31 +25,34 @@
                  >Send</button>
             </div>
         </div>
-        <div class="w-1/4 pt-3">{{ arrivalMessage }}</div>
+        <div class="w-1/4 pt-3">
+          <allUsers v-for="item in allUser"
+          :id="item._id"
+          :name="item.username"
+          :key="item._id"></allUsers>
+        </div>
     </div>
 </template>
 
 <script setup>
 import conversation from '@/components/conversation/conversation.vue';
 import message from '@/components/message/message.vue';
+import allUsers from '@/components/allUser/allUser.vue';
 import { useConversation } from '@/store/conversation';
 import { useMessage } from '@/store/message';
 import { ref, reactive, onMounted, watch } from 'vue';
-const { getConversation, setConversation,getFreindId } = useConversation();
-const { messages,newMessage } = useMessage()
 import { useUser } from '@/store/userStore';
-const { id } = useUser();
 import {io} from 'socket.io-client';
+const { id,allUser,fetchAllUser } = useUser();
+const { getConversation, setConversation,getFreindId } = useConversation();
+const { messages,newMessage,fetchMessage } = useMessage()
 
+onMounted(fetchAllUser)
 
+const scrollView = ref()
 const socket = ref();
-const receiverId = ref(getFreindId)
 const userId = ref(id.value);
-const arrivalMessage = ref({
-  sender: '',
-  text: '',
-  createdAt: null
-});
+const arrivalMessage = reactive({})
 
 onMounted(() => {
   socket.value = (io('ws://localhost:8900'))
@@ -55,13 +65,19 @@ onMounted(() => {
   });
 });
 
-
 onMounted(() => {
   socket.value.emit("addUser", userId);
     socket.value.on("getUsers", (users) => {
-        console.log(users)
+      console.log(users)
     })
 })
+
+const scrollToBottom = () => {
+  const container = scrollView.value;
+    container.scrollTop = container.scrollHeight;
+};
+
+onMounted(scrollToBottom);
 
 const inputMessage = reactive({
     conversationId: setConversation,
@@ -70,21 +86,30 @@ const inputMessage = reactive({
 })
 
 const addNewMessage = async () => {
-
   try {
     if (inputMessage.text === "") {
       return alert("Input is blank");
     }
     socket.value.emit("sendMessage", {
       senderId: userId.value,
-      receiverId: receiverId.value,
+      receiverId: getFreindId.value,
       text: inputMessage.text
     });
+    
     await newMessage(inputMessage.conversationId,inputMessage.sender,inputMessage.text);
     inputMessage.text = "";
+    scrollToBottom();
   } catch (err) {
     console.log(err);
   }
 };
 
+watch(arrivalMessage, async (newarrivalMessage) => {
+  await fetchMessage();
+  scrollToBottom();
+})
+watch(setConversation, async (newSetConnversation) => {
+  await fetchMessage();
+  scrollToBottom();
+})
 </script>
