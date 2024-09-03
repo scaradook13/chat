@@ -25,6 +25,7 @@ export function useConversation() {
 
     const newConversation = async (ConversationId, senderId, receiverId) => {
         try {
+            await fetchConversation();
             conversationStore.getFreindId = receiverId;
             
             const foundConversation = conversationStore.getConversation.conversations.find(conversation =>
@@ -43,8 +44,9 @@ export function useConversation() {
             console.log(newConversation);
             conversationStore.currentConversation = newConversation.data.members
             conversationStore.setConversation = newConversation.data._id
+            await fetchConversation();
             await getFriendConversation();
-            return await fetchConversation();
+            return
 
         } catch (err) {
             console.log(err);

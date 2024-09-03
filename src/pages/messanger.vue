@@ -58,7 +58,6 @@ onMounted(() => {
 onMounted(() => {
   socket.value.emit("addUser", userId);
   socket.value.on("getUsers", (users) => {
-    console.log(users)
   })
 })
 
@@ -98,10 +97,15 @@ const addNewMessage = async () => {
   }
 };
 
-watch(arrivalMessage, async () => {
-  await fetchMessage();
-  scrollToBottom();
-})
+watch(arrivalMessage, async (m) => {
+  setTimeout(async() => {
+    fetchMessage();
+  }, 500);
+
+  setTimeout(async() => {
+    scrollToBottom();
+  }, 600);
+});
 watch(setConversation, async () => {
   await fetchMessage();
   scrollToBottom();
