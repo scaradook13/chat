@@ -12,12 +12,12 @@ const props = defineProps(['id','name'])
 import { useUser } from '@/store/userStore';
 import { useConversation } from '@/store/conversation';
 const { id } = useUser();
-const { newConversation } = useConversation();
-
+const { newConversation, getConversation } = useConversation();
+const convo = getConversation.value
 
 const newConvo = async () => {
 try {
-    await newConversation(id.value,props.id);
+    await newConversation(convo._id,id.value,props.id);
 } catch (err) {
     console.log(err);
 }

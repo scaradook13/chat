@@ -7,7 +7,7 @@ import { useUser } from "@/store/userStore";
 import { useConversation } from "@/store/conversation";
 import { useMessage } from "@/store/message";
 const { checkAuth, isAuthenticated } = useAuth();
-const { fetchUser } = useUser();
+const { fetchUser,fetchAllUser } = useUser();
 const { fetchConversation } = useConversation();
 const { fetchMessage } = useMessage();
 const router = createRouter({
@@ -37,9 +37,9 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   await checkAuth();
   await fetchUser();
-  await fetchConversation();
+  await fetchAllUser();
   await fetchMessage();
-  console.log(isAuthenticated.value);
+  await fetchConversation();
   //
   if (to.meta.requiresAuth && !isAuthenticated.value) return next("/login");
 

@@ -28,11 +28,13 @@
 <script setup>
 import { useAuth } from '@/store/authStore';
 import { useRouter } from 'vue-router'
+import { useConversation } from '@/store/conversation';
 const { isAuthenticated, checkAuth } = useAuth()
+const { logOut } = useConversation();
 const router = useRouter()
 
 const logout = async () => {
-
+    await logOut();
     localStorage.removeItem('jwt')
     await checkAuth()
     router.push('/login')

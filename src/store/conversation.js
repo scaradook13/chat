@@ -1,13 +1,14 @@
 import apiClient from "@/config/axiosClient";
 import { reactive, ref, toRefs } from "vue";
-import { useUser } from '@/store/userStore';
+import { useUser } from "./userStore";
 const { id } = useUser();
 
 const conversationStore = reactive({
     getFreindId: [],
     getConversation: [],
     setConversation: null,
-    currentConversation:[],
+    currentConversation: [],
+    ReceiverConversationId:null
 })
 
 export function useConversation() {
@@ -15,38 +16,66 @@ export function useConversation() {
     const fetchConversation = async () => {
 
         try {
-            const response = await apiClient("/getConversation/" + id.value);
-            conversationStore.getConversation = response.data
-
+            const response = await apiClient("/getConversation");
+            conversationStore.getConversation = response.data[0]
         } catch (err) {
             console.log(err);
         }
     };
 
-    const newConversation = async (senderId, receiverId) => {
+    const newConversation = async (ConversationId, senderId, receiverId) => {
         try {
-            await fetchConversation();
             conversationStore.getFreindId = receiverId;
-            const foundConversation = conversationStore.getConversation.find(conversation =>
+            
+            const foundConversation = conversationStore.getConversation.conversations.find(conversation =>
                 conversation.members.some(m => m === receiverId)
             );
-            if(foundConversation){
+            
+            if (foundConversation) {
                 conversationStore.currentConversation = foundConversation.members
-               return conversationStore.setConversation = foundConversation._id
+                conversationStore.setConversation = foundConversation._id
+                await getFriendConversation();
+                await fetchConversation();
+                return
+
             }
-            const newConversation = await apiClient.post('/newConversation', {senderId,receiverId});
+            const newConversation = await apiClient.post('/newConversation', { ConversationId, senderId, receiverId });
+            console.log(newConversation);
             conversationStore.currentConversation = newConversation.data.members
-            return conversationStore.setConversation = newConversation.data._id
+            conversationStore.setConversation = newConversation.data._id
+            await getFriendConversation();
+            return await fetchConversation();
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const getFriendConversation = async () => {
+        try {
+            const response = await apiClient('/getFriendConversation/'+ conversationStore.getFreindId);
+
+            const conversation = response.data[0].conversations.find(conversation =>
+                conversation.members.some(m => m === id.value)
+            );       
+            conversationStore.ReceiverConversationId = conversation._id
             
         } catch (err) {
             console.log(err);
         }
     }
 
-
+    const logOut = async () => {
+        conversationStore.setConversation = null;
+        conversationStore.currentConversation = null;
+        conversationStore.getFreindId = null;
+    }
+ 
     return {
         ...toRefs(conversationStore),
         fetchConversation,
-        newConversation
+        newConversation,
+        getFriendConversation,
+        logOut
     };
 }

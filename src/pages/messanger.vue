@@ -1,37 +1,29 @@
 <template>
-    <div class="h-screen flex">
-        <div class="w-1/4 pt-3">
-            <conversation v-for="item in allUser" :name="item.username" :id="item._id" :key="item._id"/>
-        </div>
-        <div class="w-1/2 pt-3">
-            <div ref="scrollView" class="h-4/6 p-3 overflow-y-scroll scroll-smooth	">
-              <div v-if="setConversation === null">
-                <h1 class="text-4xl text-center pt-20">Start a conversation</h1>
-              </div>
-                  <message  v-for="item in messages" 
-                  :text="item.text" 
-                  :time="item.createdAt"
-                  :sender="item.sender" 
-                  :key="item._id"
-                />
-            </div>
-            <div v-if="setConversation !== null" class="flex items-center justify-between">
-                <textarea
-                v-model="inputMessage.text"
-                required class="w-10/12 h-20 p-3 border-gray border-2" name="" id="" placeholder="Send a message ..."></textarea>
-                <button
-                @click="addNewMessage" 
-                class="mr-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                 >Send</button>
-            </div>
-        </div>
-        <div class="w-1/4 pt-3">
-          <allUsers v-for="item in allUser"
-          :id="item._id"
-          :name="item.username"
-          :key="item._id"></allUsers>
-        </div>
+  <div class="h-screen flex">
+    <div class="w-1/4 pt-3">
+      <conversation v-for="item in allUser" :name="item.username" :id="item._id" :key="item._id" />
     </div>
+    <div class="w-1/2 pt-3">
+      <div ref="scrollView" class="h-4/6 p-3 overflow-y-scroll scroll-smooth	">
+        <div v-if="setConversation === null">
+          <h1 class="text-4xl text-center pt-20">Start a conversation</h1>
+        </div>
+        <div v-if="setConversation !== null">
+          <message v-for="item in messages" :text="item.text" :time="item.createdAt" :sender="item.sender"
+            :key="item._id" />
+        </div>
+      </div>
+      <div v-if="setConversation !== null" class="flex items-center justify-between">
+        <textarea v-model="inputMessage.text" required class="w-10/12 h-20 p-3 border-gray border-2" name="" id=""
+          placeholder="Send a message ..."></textarea>
+        <button @click="addNewMessage"
+          class="mr-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Send</button>
+      </div>
+    </div>
+    <div class="w-1/4 pt-3">
+      <allUsers v-for="item in allUser" :id="item._id" :name="item.username" :key="item._id"></allUsers>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -42,12 +34,10 @@ import { useConversation } from '@/store/conversation';
 import { useMessage } from '@/store/message';
 import { ref, reactive, onMounted, watch } from 'vue';
 import { useUser } from '@/store/userStore';
-import {io} from 'socket.io-client';
-const { id,allUser,fetchAllUser } = useUser();
-const { getConversation, setConversation,getFreindId } = useConversation();
-const { messages,newMessage,fetchMessage } = useMessage()
-
-onMounted(fetchAllUser)
+import { io } from 'socket.io-client';
+const { id, allUser } = useUser();
+const {  setConversation, getFreindId,ReceiverConversationId } = useConversation();
+const { messages, newMessage, fetchMessage } = useMessage()
 
 const scrollView = ref()
 const socket = ref();
@@ -67,22 +57,24 @@ onMounted(() => {
 
 onMounted(() => {
   socket.value.emit("addUser", userId);
-    socket.value.on("getUsers", (users) => {
-      console.log(users)
-    })
+  socket.value.on("getUsers", (users) => {
+    console.log(users)
+  })
 })
 
 const scrollToBottom = () => {
   const container = scrollView.value;
-    container.scrollTop = container.scrollHeight;
+  container.scrollTop = container.scrollHeight;
 };
 
 onMounted(scrollToBottom);
 
 const inputMessage = reactive({
-    conversationId: setConversation,
-    sender: id.value,
-    text:"",
+  ReceiverConversationId,
+  SenderConversationId: setConversation,
+  sender: id.value,
+  receiverId: getFreindId,
+  text: "",
 })
 
 const addNewMessage = async () => {
@@ -90,13 +82,15 @@ const addNewMessage = async () => {
     if (inputMessage.text === "") {
       return alert("Input is blank");
     }
-    socket.value.emit("sendMessage", {
+
+    await socket.value.emit("sendMessage", {
       senderId: userId.value,
       receiverId: getFreindId.value,
       text: inputMessage.text
-    });
-    
-    await newMessage(inputMessage.conversationId,inputMessage.sender,inputMessage.text);
+    });  
+
+    await newMessage(inputMessage.SenderConversationId,inputMessage.ReceiverConversationId,inputMessage.sender,
+    inputMessage.receiverId, inputMessage.text);
     inputMessage.text = "";
     scrollToBottom();
   } catch (err) {
@@ -104,11 +98,11 @@ const addNewMessage = async () => {
   }
 };
 
-watch(arrivalMessage, async (newarrivalMessage) => {
+watch(arrivalMessage, async () => {
   await fetchMessage();
   scrollToBottom();
 })
-watch(setConversation, async (newSetConnversation) => {
+watch(setConversation, async () => {
   await fetchMessage();
   scrollToBottom();
 })

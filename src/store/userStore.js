@@ -4,7 +4,7 @@ import { reactive, toRefs} from "vue";
 const userStore = reactive({
   username: [],
   id:[],
-  allUser:[]
+  allUser:null
 })
 
  
