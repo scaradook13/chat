@@ -1,12 +1,13 @@
 <template>
-    <div v-if="props.id !== id" class="flex items-center p-3 hover:bg-gray-100 pl-10 cursor-pointer"
-        @click="newConvo()">
-        <div class="relative me-4">
-            <img class="w-10 h-10 rounded-full" src="/public/favicon.ico" alt="profile image">
+    <div v-if="props.id !== id" class="flex items-center p-3 hover:bg-gray-100 pl-10 cursor-pointer max-sm:flex-col max-sm:p-2 max-sm:max-w-15
+    max-sm:mx-1 max-sm:text-center" @click="newConvo()">
+        <div class="relative">
+            <img class="w-10 h-10 rounded-full max-sm:max-w-10 max-sm:max-h-10" src="/public/favicon.ico"
+                alt="profile image">
             <span v-if="props.id === UsersActive.activeUsers"
                 class="top-0 start-7 absolute w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
         </div>
-        <span class="font-medium text-lg">{{ props.name }}</span>
+        <div class="font-medium pl-3 break-words text-lg max-sm:text-sm max-sm:max-w-15 max-sm:max-h-13 max-sm:p-0 max-sm:w-14"><p>{{ props.name }}</p></div>
     </div>
 </template>
 
@@ -52,7 +53,7 @@ onMounted(() => {
         }
     })
 })
-onUnmounted(()=> {
-   
+onUnmounted(() => {
+
 })
 </script>

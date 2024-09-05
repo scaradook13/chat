@@ -1,26 +1,26 @@
 <template>
-  <div class="h-screen flex">
-    <div class="w-1/4 pt-3">
+  <div class="h-screen flex max-sm:flex-col max-sm:h-auto max-sm:relative">
+    <div class="w-1/4 pt-3 max-sm:order-2 max-sm:w-full max-sm:pt-0 max-sm:bg-gray-100">
       <conversation v-for="item in allUser" :name="item.username" :id="item._id" :key="item._id" />
     </div>
-    <div class="w-1/2 pt-3">
-      <div ref="scrollView" class="h-4/6 p-3 overflow-y-scroll scroll-smooth	">
+    <div class="w-1/2 pt-3 max-sm:w-full max-sm:p-0 max-sm:order-3">
+      <div ref="scrollView" class="h-4/6 p-3 overflow-y-scroll scroll-smooth max-sm:h-full max-sm:overflow-y-auto max-sm:fixed max-sm:w-full max-sm:pb-80">
         <div v-if="setConversation === null">
-          <h1 class="text-4xl text-center pt-20">Start a conversation</h1>
+          <h1 class="text-4xl text-center pt-20 ">Start a conversation</h1>
         </div>
         <div v-if="setConversation !== null">
           <message v-for="item in messages" :text="item.text" :time="item.createdAt" :sender="item.sender"
             :key="item._id" />
         </div>
       </div>
-      <div v-if="setConversation !== null" class="flex items-center justify-between">
-        <textarea v-model="inputMessage.text" required class="w-10/12 h-20 p-3 border-gray border-2" name="" id=""
+      <div v-if="setConversation !== null" class="flex items-center justify-between max-sm:w-full max-sm:bg-gray-100 max-sm:px-2 max-sm:py-1 max-sm:fixed max-sm:bottom-0">
+        <textarea v-model="inputMessage.text" required class="w-10/12 h-20 p-3 border-gray border-2 mr-2" name="" id=""
           placeholder="Send a message ..."></textarea>
         <button @click="addNewMessage"
           class="mr-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Send</button>
       </div>
     </div>
-    <div class="w-1/4 pt-3">
+    <div class="w-1/4 pt-3 max-sm:flex max-sm:w-full max-sm:overflow-y-auto max-sm:pt-0 max-sm:bg-gray-200 max-sm:order-1">
       <allUsers v-for="item in allUser" :id="item._id" :name="item.username" :key="item._id"></allUsers>
     </div>
   </div>
@@ -104,7 +104,7 @@ watch(arrivalMessage, async (m) => {
 
   setTimeout(async() => {
     scrollToBottom();
-  }, 600);
+  }, 800);
 });
 watch(setConversation, async () => {
   await fetchMessage();
